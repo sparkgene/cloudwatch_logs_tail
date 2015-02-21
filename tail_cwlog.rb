@@ -17,9 +17,6 @@ def parse_options(argv)
   opts = {}
 
   @parser = OptionParser.new do |o|
-    o.on '--use-iamrole', "USE IAM ROLE" do |arg|
-      opts[:use_iamrole] = arg
-    end
 
     o.on '--aws-region=[VALUE]', "AWS REGION" do |arg|
       opts[:aws_region] = arg
@@ -59,7 +56,7 @@ def parse_options(argv)
   end
   @parser.parse!(argv)
   opts[:aws_region] ||= "us-east-1"
-  opts[:use_iamrole] = false if opts[:aws_access_key] || opts[:aws_secret_key]
+  opts[:use_iamrole] = !(opts[:aws_access_key] || opts[:aws_secret_key])
   opts
 end
 

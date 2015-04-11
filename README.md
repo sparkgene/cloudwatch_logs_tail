@@ -47,7 +47,7 @@ server-apps-3
 
 ### discover old logs like `tail -100`
 ```
-% ruby tail_cwlog.rb --aws-region=ap-northeast-1 --discribe-streams --log-group=/var/log/cron --log-stream=server-apps-3 --tail=100
+% ruby tail_cwlog.rb --aws-region=ap-northeast-1 --log-group=/var/log/cron --log-stream=server-apps-3 --tail=100
 
 Feb 21 01:22:01 server-apps-3 CROND[2837]: (root) CMD (/var/awslogs/bin/awslogs-nanny.sh > /dev/null 2>&1)
 Feb 21 01:23:01 server-apps-3 CROND[2863]: (root) CMD (/var/awslogs/bin/awslogs-nanny.sh > /dev/null 2>&1)
@@ -57,7 +57,7 @@ snip
 
 ### `tail -f` Log Stream
 ```
-% ruby tail_cwlog.rb --aws-region=ap-northeast-1 --discribe-streams --log-group=/var/log/cron --log-stream=server-apps-3 --tailf
+% ruby tail_cwlog.rb --aws-region=ap-northeast-1 --log-group=/var/log/cron --log-stream=server-apps-3 --tailf
 
 Feb 21 01:22:01 server-apps-3 CROND[2837]: (root) CMD (/var/awslogs/bin/awslogs-nanny.sh > /dev/null 2>&1)
 Feb 21 01:23:01 server-apps-3 CROND[2863]: (root) CMD (/var/awslogs/bin/awslogs-nanny.sh > /dev/null 2>&1)

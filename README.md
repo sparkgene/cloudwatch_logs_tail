@@ -18,8 +18,8 @@ Usage: tail_cwlog [options]
         --aws-region=[VALUE]         AWS REGION
         --aws-access-key=[VALUE]     AWS ACCESS KEY
         --aws-secret-key=[VALUE]     AWS SECRET KEY
-        --discribe-groups            Describe log groups
-        --discribe-streams           Describe log streams
+        --describe-groups            Describe log groups
+        --describe-streams           Describe log streams
         --tailf                      tail -f log stream
         --tail=[VALUE]               tail log stream
         --log-group=[VALUE]          log group name
@@ -28,7 +28,7 @@ Usage: tail_cwlog [options]
 
 ### describe Log Groups
 ```
-% ruby tail_cwlog.rb --aws-region=ap-northeast-1 --discribe-groups
+% ruby tail_cwlog.rb --aws-region=ap-northeast-1 --describe-groups
 
 /var/log/cron
 /var/log/maillog
@@ -38,7 +38,7 @@ Usage: tail_cwlog [options]
 
 ### describe Log Streams
 ```
-% ruby tail_cwlog.rb --aws-region=ap-northeast-1 --discribe-streams --log-group=/var/log/cron
+% ruby tail_cwlog.rb --aws-region=ap-northeast-1 --describe-streams --log-group=/var/log/cron
 
 server-apps-1
 server-apps-2

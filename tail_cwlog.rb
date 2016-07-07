@@ -2,7 +2,7 @@
 # encoding: UTF-8
 #
 # tail_cwlog
-# Script for discribe cloudwatch logs
+# Script for describe cloudwatch logs
 #
 # Copyright 2015, Jun Ichikawa <jun1ka0@gmail.com>
 
@@ -18,6 +18,10 @@ def parse_options(argv)
 
   @parser = OptionParser.new do |o|
 
+    o.on '--aws-profile=[VALUE]', "AWS PROFILE" do |arg|
+      opts[:aws_profile] = arg
+    end
+    
     o.on '--aws-region=[VALUE]', "AWS REGION" do |arg|
       opts[:aws_region] = arg
     end
@@ -30,12 +34,12 @@ def parse_options(argv)
       opts[:aws_secret_key] = arg
     end
 
-    o.on '--discribe-groups', "Describe log groups" do |arg|
-      opts[:discribe_groups] = arg
+    o.on '--describe-groups', "Describe log groups" do |arg|
+      opts[:describe_groups] = arg
     end
 
-    o.on '--discribe-streams', "Describe log streams" do |arg|
-      opts[:discribe_streams] = arg
+    o.on '--describe-streams', "Describe log streams" do |arg|
+      opts[:describe_streams] = arg
     end
 
     o.on '--tailf', "tail -f log stream" do |arg|
@@ -56,27 +60,39 @@ def parse_options(argv)
   end
   @parser.parse!(argv)
   opts[:aws_region] ||= "us-east-1"
-  opts[:use_iamrole] = !(opts[:aws_access_key] || opts[:aws_secret_key])
+  opts[:use_iamrole] = !(opts[:aws_profile] || opts[:aws_access_key] || opts[:aws_secret_key])
   opts
 end
 
-def validate_params(options)
-  unless options[:use_iamrole]
-    (puts "--aws-access-key is required"; exit(1)) unless options[:aws_access_key]
-    (puts "--aws-secret-key is required"; exit(1)) unless options[:aws_secret_key]
+def validate_credentials!(options)
+  return if options[:use_iamrole]
+  return if options[:aws_profile] || (options[:aws_access_key] && options[:aws_secret_key])
+
+  if options[:aws_access_key]
+    puts "--aws-secret-key is required"
+  elsif options[:aws_secret_key]
+    puts "--aws-access-key is required"
+  else
+    puts "--aws_profile or --aws-access-key and --aws-secret-key is required"
   end
 
+  exit 1
+end
+
+def validate_params(options)
+  validate_credentials!(options)
+
   type_cnt = 0
-  type_cnt += 1 if options[:discribe_groups]
-  type_cnt += 1 if options[:discribe_streams]
+  type_cnt += 1 if options[:describe_groups]
+  type_cnt += 1 if options[:describe_streams]
   type_cnt += 1 if options[:tail]
   type_cnt += 1 if options[:tailf]
   if type_cnt != 1
-    puts "Specify one type [--discribe-groups, --discribe-streams, --tail, --tailf]"
+    puts "Specify one type [--describe-groups, --describe-streams, --tail, --tailf]"
     exit(1)
   end
 
-  if options[:discribe_streams]
+  if options[:describe_streams]
     (puts "--log-group is required"; exit(1)) unless options[:log_group]
   end
 
@@ -90,6 +106,13 @@ def cloudwatch_client(options)
   if options[:use_iamrole]
     Aws::CloudWatchLogs::Client.new(
       region: options[:aws_region]
+    )
+  elsif options[:aws_profile]
+    Aws::CloudWatchLogs::Client.new(
+      region: options[:aws_region],
+      credentials: Aws::SharedCredentials.new(
+        profile_name: options[:aws_profile]
+      )
     )
   else
     Aws::CloudWatchLogs::Client.new(
@@ -112,7 +135,7 @@ def describe_groups(options)
   end
 end
 
-def discribe_streams(options)
+def describe_streams(options)
   cloudwatchlogs = cloudwatch_client(options)
   pages = cloudwatchlogs.describe_log_streams(
     log_group_name: options[:log_group]
@@ -150,13 +173,13 @@ end
 options = parse_options(ARGV)
 validate_params(options)
 
-if options[:discribe_groups]
+if options[:describe_groups]
   describe_groups(options)
   exit!
 end
 
-if options[:discribe_streams]
-  discribe_streams(options)
+if options[:describe_streams]
+  describe_streams(options)
   exit!
 end
 

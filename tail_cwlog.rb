@@ -18,6 +18,10 @@ def parse_options(argv)
 
   @parser = OptionParser.new do |o|
 
+    o.on '--aws-profile=[VALUE]', "AWS PROFILE" do |arg|
+      opts[:aws_profile] = arg
+    end
+    
     o.on '--aws-region=[VALUE]', "AWS REGION" do |arg|
       opts[:aws_region] = arg
     end
@@ -56,15 +60,27 @@ def parse_options(argv)
   end
   @parser.parse!(argv)
   opts[:aws_region] ||= "us-east-1"
-  opts[:use_iamrole] = !(opts[:aws_access_key] || opts[:aws_secret_key])
+  opts[:use_iamrole] = !(opts[:aws_profile] || opts[:aws_access_key] || opts[:aws_secret_key])
   opts
 end
 
+def validate_credentials!(options)
+  return if options[:use_iamrole]
+  return if opts[:aws_profile] || (options[:aws_access_key] && options[:aws_secret_key])
+
+	if options[:aws_access_key]
+		puts "--aws-secret-key is required"
+	elsif options[:aws_secret_key]
+		puts "--aws-access-key is required"
+	else
+		puts "--aws_profile or --aws-access-key and --aws-secret-key is required"
+	end
+
+  exit 1
+end
+
 def validate_params(options)
-  unless options[:use_iamrole]
-    (puts "--aws-access-key is required"; exit(1)) unless options[:aws_access_key]
-    (puts "--aws-secret-key is required"; exit(1)) unless options[:aws_secret_key]
-  end
+  validate_credentials!(options)
 
   type_cnt = 0
   type_cnt += 1 if options[:discribe_groups]
@@ -90,6 +106,13 @@ def cloudwatch_client(options)
   if options[:use_iamrole]
     Aws::CloudWatchLogs::Client.new(
       region: options[:aws_region]
+    )
+  elsif options[:aws_profile]
+    Aws::CloudWatchLogs::Client.new(
+      region: options[:aws_region],
+      profile: Aws::SharedCredentials.new(
+        profile_name: options[:aws_profile])
+      )
     )
   else
     Aws::CloudWatchLogs::Client.new(

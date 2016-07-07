@@ -68,13 +68,13 @@ def validate_credentials!(options)
   return if options[:use_iamrole]
   return if options[:aws_profile] || (options[:aws_access_key] && options[:aws_secret_key])
 
-	if options[:aws_access_key]
-		puts "--aws-secret-key is required"
-	elsif options[:aws_secret_key]
-		puts "--aws-access-key is required"
-	else
-		puts "--aws_profile or --aws-access-key and --aws-secret-key is required"
-	end
+  if options[:aws_access_key]
+    puts "--aws-secret-key is required"
+  elsif options[:aws_secret_key]
+    puts "--aws-access-key is required"
+  else
+    puts "--aws_profile or --aws-access-key and --aws-secret-key is required"
+  end
 
   exit 1
 end
